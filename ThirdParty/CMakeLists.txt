@@ -1,0 +1,21 @@
+set(THIRD_PARTY_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}")
+
+MESSAGE(STATUS ${THIRD_PARTY_FOLDER})
+
+if(NOT TARGET glm)
+    option(BUILD_STATIC_LIBS "" ON)
+    option(BUILD_TESTING "" OFF)
+    option(GLM_TEST_ENABLE "" OFF)
+    add_subdirectory(glm)
+    set_target_properties(glm_static PROPERTIES FOLDER ${THIRD_PARTY_FOLDER}/glm)
+endif()
+
+if(NOT TARGET glfw)
+    option(GLFW_BUILD_EXAMPLES "" OFF)
+    option(GLFW_BUILD_TESTS "" OFF)
+    option(GLFW_BUILD_DOCS "" OFF)
+    option(GLFW_INSTALL "" OFF)
+    add_subdirectory(glfw)
+    set_target_properties(glfw PROPERTIES FOLDER ${THIRD_PARTY_FOLDER}/glfw)
+    set_target_properties(update_mappings PROPERTIES FOLDER ${THIRD_PARTY_FOLDER}/glfw)
+endif()

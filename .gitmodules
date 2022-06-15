@@ -1,0 +1,8 @@
+[submodule "ThirdParty/glfw"]
+	path = ThirdParty/glfw
+	url = git@github.com:glfw/glfw.git
+	branch = 3.3-stable
+[submodule "ThirdParty/glm"]
+	path = ThirdParty/glm
+	url = git@github.com:g-truc/glm.git
+	branch = cmake3
