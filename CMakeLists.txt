@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(LearnVulkan VERSION 0.1.0)
 
 IF(${UNIX})
@@ -86,8 +86,9 @@ if(${OS_MACOS})
 endif()
 
 if(${OS_LINUX})
-    set(glslangValidator_executable ${VULKAN_PATH}/Bin/glslangValidator)
-    add_compile_definitions("LEARN_VULKAN_VK_LAYER_PATH=${VULKAN_PATH}/Bin")
+    MESSAGE(STATUS ${VULKAN_PATH})
+    find_program(glslangValidator_executable glslangValidator)
+    add_compile_definitions("LEARN_VULKAN_VK_LAYER_PATH=/usr/share/vulkan/explicit_layer.d")
 endif()
 
 add_subdirectory(ThirdParty)
