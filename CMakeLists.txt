@@ -75,14 +75,14 @@ set(LEARN_VULKAN_BINARY_ROOT_DIR "${CMAKE_BINARY_DIR}")
 set(THIRD_PARTY_DIR "${LEARN_VULKAN_ROOT_DIR}/ThirdParty")
 
 if(${OS_WINDOWS})
-    set(glslangValidator_executable ${VULKAN_PATH}/Bin/glslangValidator.exe)
+    set(glslangValidator_executable ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE})
     add_compile_definitions("LEARN_VULKAN_VK_LAYER_PATH=${VULKAN_PATH}/Bin")
 endif()
 
 if(${OS_MACOS})
-    set(glslangValidator_executable ${VULKAN_PATH}/Bin/glslangValidator)
-    add_compile_definitions("LEARN_VULKAN_VK_LAYER_PATH=${VULKAN_PATH}/Bin")
-    add_compile_definitions("LEARN_VULKAN_VK_ICD_FILENAMES=${VULKAN_PATH}/Bin/MoltenKV_icd.json")
+    set(glslangValidator_executable ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE})
+    add_compile_definitions("LEARN_VULKAN_VK_LAYER_PATH=$ENV{VULKAN_SDK}/share/vulkan/explicit_layer.d")
+    add_compile_definitions("LEARN_VULKAN_VK_ICD_FILENAMES=$ENV{VULKAN_SDK}/share/vulkan/icd.d/MoltenKV_icd.json")
 endif()
 
 if(${OS_LINUX})
