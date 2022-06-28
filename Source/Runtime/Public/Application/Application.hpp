@@ -11,7 +11,7 @@ namespace LearnVulkan
     public:
         explicit Application(const ApplicationConfiguration&);
         Application() = delete;
-        virtual int  initialize() override;
+        virtual int initialize() override;
         virtual void finalize() override;
         virtual void tick() override;
 
@@ -19,12 +19,14 @@ namespace LearnVulkan
 
     protected:
         bool mbQuit;
-
         const ApplicationConfiguration& mConfig;
-
-        uint32_t mVulkanExtensionCount = 0;
+        VkInstance mVulkanInstance;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
+
+    private:
+        static bool checkExtensionSupport();
+        void createVulkanInstance();
     };
 }  // namespace LearnVulkan
