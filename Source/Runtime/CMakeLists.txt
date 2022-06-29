@@ -19,6 +19,13 @@ target_compile_definitions(${TARGET_NAME}
     $<$<CONFIG:Debug>:DEBUG>
 )
 
+if(${OS_MACOS})
+    target_compile_definitions(${TARGET_NAME} 
+        PRIVATE
+        OS_MACOS
+    )
+endif()
+
 target_link_libraries(${TARGET_NAME} PUBLIC glm)
 target_link_libraries(${TARGET_NAME} PUBLIC glfw)
 target_link_libraries(${TARGET_NAME} PUBLIC ${Vulkan_LIBRARY})

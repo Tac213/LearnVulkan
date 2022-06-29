@@ -159,6 +159,10 @@ void Application::createVulkanInstance()
     createInfo.pNext = nullptr;
 #endif
 
+#ifdef OS_MACOS
+    createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
+
     if (vkCreateInstance(&createInfo, nullptr, &mVulkanInstance) != VK_SUCCESS)
     {
         mbQuit = true;
@@ -173,6 +177,9 @@ std::vector<const char*> Application::getRequiredExtensions()
     std::vector<const char*> extensions(glfwRequiredExtensions, glfwRequiredExtensions + glfwRequiredExtensionCount);
 #ifdef DEBUG
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+#ifdef OS_MACOS
+    extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
     return extensions;
 }
