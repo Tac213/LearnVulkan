@@ -23,9 +23,11 @@ namespace LearnVulkan
         bool mbQuit;
         const ApplicationConfiguration& mConfig;
         VkInstance mVulkanInstance;
+        VkSurfaceKHR mWindowSurface;
         VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
         VkDevice mLogicalDevice;
         VkQueue mGraphicsQueue;
+        VkQueue mPresentQueue;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
@@ -50,9 +52,10 @@ namespace LearnVulkan
 #endif
 
         void pickPysicalDevice();
-        static int rateDeviceSuitability(VkPhysicalDevice device);
-        static QueueFamilyIndices findQueueFamilyIndices(VkPhysicalDevice device);
+        int rateDeviceSuitability(VkPhysicalDevice device);
+        QueueFamilyIndices findQueueFamilyIndices(VkPhysicalDevice device);
 
         void createLogicalDevice();
+        void createWindowSurface();
     };
 }  // namespace LearnVulkan
