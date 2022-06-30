@@ -83,6 +83,7 @@ void Application::initVulkan()
 #ifdef DEBUG
     setupDebugMessenger();
 #endif
+    pickPysicalDevice();
 }
 
 bool Application::checkExtensionSupport()
@@ -264,3 +265,90 @@ void Application::destoryDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtil
     func(instance, debugMessenger, pAllocator);
 }
 #endif  // ifdef DEBUG
+
+void Application::pickPysicalDevice()
+{
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(mVulkanInstance, &deviceCount, nullptr);
+
+    if (deviceCount == 0)
+    {
+        std::cerr << "Failed to find GPUs with Vulkan support!" << std::endl;
+        return;
+    }
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(mVulkanInstance, &deviceCount, devices.data());
+
+    int highestScore = 0;
+    for (const VkPhysicalDevice& device : devices)
+    {
+        int deviceScore = rateDeviceSuitability(device);
+        if (deviceScore > highestScore)
+        {
+            mPhysicalDevice = device;
+            highestScore = deviceScore;
+        }
+    }
+
+    if (mPhysicalDevice == VK_NULL_HANDLE)
+    {
+        std::cerr << "Failed to find a suitable GPU!" << std::endl;
+    }
+}
+
+int Application::rateDeviceSuitability(VkPhysicalDevice device)
+{
+    QueueFamilyIndices indices = findQueueFamilyIndices(device);
+    if (!indices.isComplete())
+    {
+        return 0;
+    }
+
+    VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    // Application cannot function without geometry shaders
+    if (!deviceFeatures.geometryShader)
+    {
+        return 0;
+    }
+
+    int score = 0;
+
+    // Discrete GPUs have a significant performance advantage
+    if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+    {
+        score += 1000;
+    }
+
+    // Maximum possible size of textures affects graphics quality
+    score += deviceProperties.limits.maxImageDimension2D;
+
+    return score;
+}
+
+QueueFamilyIndices Application::findQueueFamilyIndices(VkPhysicalDevice device)
+{
+    QueueFamilyIndices indices;
+
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    uint32_t i = 0;
+    for (const auto& queueFamily : queueFamilies)
+    {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
+            indices.graphicsFamily = i;
+        }
+        i++;
+    }
+
+    return indices;
+}

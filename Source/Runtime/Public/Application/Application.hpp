@@ -3,6 +3,7 @@
 #include "Configuration.hpp"
 #include "Interface/IApplication.hpp"
 #include "Interface/Interface.hpp"
+#include "VulkanUtility/QueueFamilyIndices.hpp"
 #include <vector>
 
 namespace LearnVulkan
@@ -22,6 +23,7 @@ namespace LearnVulkan
         bool mbQuit;
         const ApplicationConfiguration& mConfig;
         VkInstance mVulkanInstance;
+        VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
@@ -30,6 +32,7 @@ namespace LearnVulkan
         void createVulkanInstance();
         static bool checkExtensionSupport();
         static std::vector<const char*> getRequiredExtensions();
+
 #ifdef DEBUG
         static bool checkValidationLayerSupport();
         static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -43,5 +46,9 @@ namespace LearnVulkan
         VkDebugUtilsMessengerEXT mDebugMessenger;
         static const std::vector<const char*> VALIDATION_LAYERS;
 #endif
+
+        void pickPysicalDevice();
+        static int rateDeviceSuitability(VkPhysicalDevice device);
+        static QueueFamilyIndices findQueueFamilyIndices(VkPhysicalDevice device);
     };
 }  // namespace LearnVulkan
