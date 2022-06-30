@@ -30,6 +30,7 @@ int Application::initialize()
 
 void Application::finalize()
 {
+    vkDestroyDevice(mLogicalDevice, nullptr);
 #ifdef DEBUG
     destoryDebugUtilsMessengerEXT(mVulkanInstance, mDebugMessenger, nullptr);
 #endif
@@ -84,6 +85,7 @@ void Application::initVulkan()
     setupDebugMessenger();
 #endif
     pickPysicalDevice();
+    createLogicalDevice();
 }
 
 bool Application::checkExtensionSupport()
@@ -295,6 +297,7 @@ void Application::pickPysicalDevice()
     if (mPhysicalDevice == VK_NULL_HANDLE)
     {
         std::cerr << "Failed to find a suitable GPU!" << std::endl;
+        mbQuit = true;
     }
 }
 
@@ -326,6 +329,10 @@ int Application::rateDeviceSuitability(VkPhysicalDevice device)
     {
         score += 1000;
     }
+    else if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+    {
+        score += 100;
+    }
 
     // Maximum possible size of textures affects graphics quality
     score += deviceProperties.limits.maxImageDimension2D;
@@ -354,4 +361,38 @@ QueueFamilyIndices Application::findQueueFamilyIndices(VkPhysicalDevice device)
     }
 
     return indices;
+}
+
+void Application::createLogicalDevice()
+{
+    QueueFamilyIndices indices = findQueueFamilyIndices(mPhysicalDevice);
+
+    VkDeviceQueueCreateInfo queueCreateInfo {};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+    queueCreateInfo.queueCount = 1;
+    const float QUEUE_PRIORITY = 1.0f;
+    queueCreateInfo.pQueuePriorities = &QUEUE_PRIORITY;
+
+    VkPhysicalDeviceFeatures deviceFeatures {};
+
+    VkDeviceCreateInfo createInfo {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pQueueCreateInfos = &queueCreateInfo;
+    createInfo.queueCreateInfoCount = 1;
+    createInfo.pEnabledFeatures = &deviceFeatures;
+#ifdef DEBUG
+    createInfo.enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size());
+    createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
+#else
+    createInfo.enabledLayerCount = 0;
+#endif
+
+    if (vkCreateDevice(mPhysicalDevice, &createInfo, nullptr, &mLogicalDevice) != VK_SUCCESS)
+    {
+        std::cerr << "Failed to create logical device!" << std::endl;
+        mbQuit = true;
+        return;
+    }
+    vkGetDeviceQueue(mLogicalDevice, indices.graphicsFamily.value(), 0, &mGraphicsQueue);
 }

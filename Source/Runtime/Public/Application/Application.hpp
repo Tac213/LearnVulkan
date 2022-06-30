@@ -24,6 +24,8 @@ namespace LearnVulkan
         const ApplicationConfiguration& mConfig;
         VkInstance mVulkanInstance;
         VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
+        VkDevice mLogicalDevice;
+        VkQueue mGraphicsQueue;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
@@ -50,5 +52,7 @@ namespace LearnVulkan
         void pickPysicalDevice();
         static int rateDeviceSuitability(VkPhysicalDevice device);
         static QueueFamilyIndices findQueueFamilyIndices(VkPhysicalDevice device);
+
+        void createLogicalDevice();
     };
 }  // namespace LearnVulkan
