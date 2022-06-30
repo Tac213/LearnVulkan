@@ -180,6 +180,7 @@ std::vector<const char*> Application::getRequiredExtensions()
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 #ifdef OS_MACOS
+    extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
     return extensions;
@@ -310,11 +311,13 @@ int Application::rateDeviceSuitability(VkPhysicalDevice device)
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
+#ifndef OS_MACOS
     // Application cannot function without geometry shaders
     if (!deviceFeatures.geometryShader)
     {
         return 0;
     }
+#endif
 
     int score = 0;
 
