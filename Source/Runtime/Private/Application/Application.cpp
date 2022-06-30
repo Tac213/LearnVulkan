@@ -388,6 +388,12 @@ void Application::createLogicalDevice()
     createInfo.enabledLayerCount = 0;
 #endif
 
+#ifdef OS_MACOS
+    const char* deviceExtension = "VK_KHR_portability_subset";
+    createInfo.enabledExtensionCount = 1;
+    createInfo.ppEnabledExtensionNames = &deviceExtension;
+#endif
+
     if (vkCreateDevice(mPhysicalDevice, &createInfo, nullptr, &mLogicalDevice) != VK_SUCCESS)
     {
         std::cerr << "Failed to create logical device!" << std::endl;
