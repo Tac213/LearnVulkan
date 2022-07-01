@@ -13,6 +13,13 @@ using namespace LearnVulkan;
 const std::vector<const char*> Application::VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 #endif
 
+const std::vector<const char*> Application::PHYSICAL_DEVICE_EXTENSIONS = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef OS_MACOS
+    "VK_KHR_portability_subset"
+#endif
+};
+
 Application::Application(const ApplicationConfiguration& configuration)
     : mConfig(configuration)
 {}
@@ -398,7 +405,7 @@ bool Application::checkPhysicalDeviceSupport(VkPhysicalDevice device)
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
-    std::set<std::string> requiredExtensions(mPhysicalDeviceExtensions.begin(), mPhysicalDeviceExtensions.end());
+    std::set<std::string> requiredExtensions(PHYSICAL_DEVICE_EXTENSIONS.begin(), PHYSICAL_DEVICE_EXTENSIONS.end());
     for (const auto& extension : availableExtensions)
     {
         requiredExtensions.erase(extension.extensionName);
@@ -438,8 +445,8 @@ void Application::createLogicalDevice()
     createInfo.enabledLayerCount = 0;
 #endif
 
-    createInfo.enabledExtensionCount = static_cast<uint32_t>(mPhysicalDeviceExtensions.size());
-    createInfo.ppEnabledExtensionNames = mPhysicalDeviceExtensions.data();
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(PHYSICAL_DEVICE_EXTENSIONS.size());
+    createInfo.ppEnabledExtensionNames = PHYSICAL_DEVICE_EXTENSIONS.data();
 
     if (vkCreateDevice(mPhysicalDevice, &createInfo, nullptr, &mLogicalDevice) != VK_SUCCESS)
     {

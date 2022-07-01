@@ -59,13 +59,8 @@ namespace LearnVulkan
         void pickPysicalDevice();
         int rateDeviceSuitability(VkPhysicalDevice device);
         QueueFamilyIndices findQueueFamilyIndices(VkPhysicalDevice device);
-        bool checkPhysicalDeviceSupport(VkPhysicalDevice device);
-        std::vector<const char*> mPhysicalDeviceExtensions = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-#ifdef OS_MACOS
-            "VK_KHR_portability_subset"
-#endif
-        };
+        static bool checkPhysicalDeviceSupport(VkPhysicalDevice device);
+        static const std::vector<const char*> PHYSICAL_DEVICE_EXTENSIONS;
 
         void createLogicalDevice();
         void createWindowSurface();
