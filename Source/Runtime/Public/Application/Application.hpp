@@ -4,6 +4,7 @@
 #include "Interface/IApplication.hpp"
 #include "Interface/Interface.hpp"
 #include "VulkanUtility/QueueFamilyIndices.hpp"
+#include "VulkanUtility/SwapChainSupportDetails.hpp"
 #include <vector>
 
 namespace LearnVulkan
@@ -28,6 +29,10 @@ namespace LearnVulkan
         VkDevice mLogicalDevice;
         VkQueue mGraphicsQueue;
         VkQueue mPresentQueue;
+        VkSwapchainKHR mSwapChain;
+        std::vector<VkImage> mSwapChainImages;
+        VkFormat mSwapChainImageFormat;
+        VkExtent2D mSwapChainExtent;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
@@ -54,8 +59,22 @@ namespace LearnVulkan
         void pickPysicalDevice();
         int rateDeviceSuitability(VkPhysicalDevice device);
         QueueFamilyIndices findQueueFamilyIndices(VkPhysicalDevice device);
+        bool checkPhysicalDeviceSupport(VkPhysicalDevice device);
+        std::vector<const char*> mPhysicalDeviceExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef OS_MACOS
+            "VK_KHR_portability_subset"
+#endif
+        };
 
         void createLogicalDevice();
         void createWindowSurface();
+
+        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+        static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+        static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+        void createSwapChain();
+        void clearSwapChain();
     };
 }  // namespace LearnVulkan
