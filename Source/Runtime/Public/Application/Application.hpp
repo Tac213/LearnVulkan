@@ -34,6 +34,7 @@ namespace LearnVulkan
         VkFormat mSwapChainImageFormat;
         VkExtent2D mSwapChainExtent;
         std::vector<VkImageView> mSwapChainImageViews;
+        VkRenderPass mRenderPass;
         VkPipelineLayout mPipelineLayout;
 
         virtual void initWindow() override;
@@ -74,6 +75,7 @@ namespace LearnVulkan
         void createSwapChain();
         void clearSwapChain();
         void createImageViews();
+        void createRenderPass();
         void createGraphicsPipeline();
 
         VkShaderModule createShaderModule(std::vector<char> shaderCode);
