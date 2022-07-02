@@ -36,6 +36,7 @@ namespace LearnVulkan
         std::vector<VkImageView> mSwapChainImageViews;
         VkRenderPass mRenderPass;
         VkPipelineLayout mPipelineLayout;
+        VkPipeline mGraphicsPipeline;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;

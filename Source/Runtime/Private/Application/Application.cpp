@@ -41,6 +41,7 @@ int Application::initialize()
 
 void Application::finalize()
 {
+    vkDestroyPipeline(mLogicalDevice, mGraphicsPipeline, nullptr);
     vkDestroyPipelineLayout(mLogicalDevice, mPipelineLayout, nullptr);
     vkDestroyRenderPass(mLogicalDevice, mRenderPass, nullptr);
     clearSwapChain();
@@ -778,6 +779,34 @@ void Application::createGraphicsPipeline()
     if (vkCreatePipelineLayout(mLogicalDevice, &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
     {
         std::cerr << "Failed to create pipeline layout" << std::endl;
+        mbQuit = true;
+        return;
+    }
+
+    VkGraphicsPipelineCreateInfo pipelineInfo {};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.stageCount = 2;
+    pipelineInfo.pStages = shaderStageInfos;
+    pipelineInfo.pVertexInputState = &vertexInputInfo;
+    pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pViewportState = &viewportState;
+    pipelineInfo.pRasterizationState = &rasterizationState;
+    pipelineInfo.pMultisampleState = &multisampleState;
+    pipelineInfo.pDepthStencilState = nullptr;
+    pipelineInfo.pColorBlendState = &colorBlendState;
+    pipelineInfo.pDynamicState = nullptr;
+
+    pipelineInfo.layout = mPipelineLayout;
+
+    pipelineInfo.renderPass = mRenderPass;
+    pipelineInfo.subpass = 0;
+
+    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+    pipelineInfo.basePipelineIndex = -1;
+
+    if (vkCreateGraphicsPipelines(mLogicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &mGraphicsPipeline) != VK_SUCCESS)
+    {
+        std::cerr << "Failed to create graphics pipeline" << std::endl;
         mbQuit = true;
         return;
     }
