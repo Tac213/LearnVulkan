@@ -33,6 +33,7 @@ namespace LearnVulkan
         std::vector<VkImage> mSwapChainImages;
         VkFormat mSwapChainImageFormat;
         VkExtent2D mSwapChainExtent;
+        std::vector<VkImageView> mSwapChainImageViews;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
@@ -71,5 +72,6 @@ namespace LearnVulkan
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
         void createSwapChain();
         void clearSwapChain();
+        void createImageViews();
     };
 }  // namespace LearnVulkan
