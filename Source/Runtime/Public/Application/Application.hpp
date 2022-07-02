@@ -73,5 +73,8 @@ namespace LearnVulkan
         void createSwapChain();
         void clearSwapChain();
         void createImageViews();
+        void createGraphicsPipeline();
+
+        VkShaderModule createShaderModule(std::vector<char> shaderCode);
     };
 }  // namespace LearnVulkan

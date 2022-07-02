@@ -29,6 +29,9 @@ Build/
 *.a
 *.lib
 
+# Compiled SPIR-V files
+*.spv
+
 # Executables
 *.exe
 *.out
