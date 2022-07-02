@@ -34,6 +34,7 @@ namespace LearnVulkan
         VkFormat mSwapChainImageFormat;
         VkExtent2D mSwapChainExtent;
         std::vector<VkImageView> mSwapChainImageViews;
+        VkPipelineLayout mPipelineLayout;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
