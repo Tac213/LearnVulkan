@@ -38,6 +38,8 @@ namespace LearnVulkan
         VkPipelineLayout mPipelineLayout;
         VkPipeline mGraphicsPipeline;
         std::vector<VkFramebuffer> mSwapchainFramebuffers;
+        VkCommandPool mCommandPool;
+        VkCommandBuffer mCommandBuffer;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
@@ -82,5 +84,8 @@ namespace LearnVulkan
 
         VkShaderModule createShaderModule(std::vector<char> shaderCode);
         void createFramebuffers();
+        void createCommandPool();
+        void createCommandBuffer();
+        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
     };
 }  // namespace LearnVulkan
