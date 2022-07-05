@@ -41,6 +41,9 @@ int Application::initialize()
 
 void Application::finalize()
 {
+    vkDestroyFence(mLogicalDevice, mInFlightFence, nullptr);
+    vkDestroySemaphore(mLogicalDevice, mRenderFinishedSemaphore, nullptr);
+    vkDestroySemaphore(mLogicalDevice, mImageAvailableSemaphore, nullptr);
     vkDestroyCommandPool(mLogicalDevice, mCommandPool, nullptr);
     for (VkFramebuffer framebuffer : mSwapchainFramebuffers)
     {
@@ -67,10 +70,12 @@ void Application::tick()
 {
     if (glfwWindowShouldClose(mWindow))
     {
+        vkDeviceWaitIdle(mLogicalDevice);
         mbQuit = true;
         return;
     }
     glfwPollEvents();
+    drawFrame();
 }
 
 bool Application::isQuit()
@@ -115,6 +120,59 @@ void Application::initVulkan()
     createFramebuffers();
     createCommandPool();
     createCommandBuffer();
+    createSyncronizationObject();
+}
+
+void Application::drawFrame()
+{
+    // Wait until the previous frame has finished
+    vkWaitForFences(mLogicalDevice, 1, &mInFlightFence, VK_TRUE, UINT64_MAX);
+    // reset the fence to the unsignaled state
+    vkResetFences(mLogicalDevice, 1, &mInFlightFence);
+
+    // acquiring an image from the swap chain
+    uint32_t imageIndex;
+    vkAcquireNextImageKHR(mLogicalDevice, mSwapChain, UINT64_MAX, mImageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+    // record the command buffer
+    vkResetCommandBuffer(mCommandBuffer, 0);
+    recordCommandBuffer(mCommandBuffer, imageIndex);
+
+    // submit the command buffer
+    VkSubmitInfo submitInfo {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    VkSemaphore waitSemaphores[] = {mImageAvailableSemaphore};
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &mCommandBuffer;
+    VkSemaphore signalSemaphores[] = {mRenderFinishedSemaphore};
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    // submit the command buffer to the graphics queue
+    if (vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, mInFlightFence) != VK_SUCCESS)
+    {
+        std::cerr << "Failed to submit draw command buffer!" << std::endl;
+        mbQuit = true;
+        return;
+    }
+
+    VkPresentInfoKHR presentInfo {};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+
+    VkSwapchainKHR swapchains[] = {mSwapChain};
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapchains;
+    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pResults = nullptr;
+
+    vkQueuePresentKHR(mPresentQueue, &presentInfo);
 }
 
 bool Application::checkExtensionSupport()
@@ -667,12 +725,23 @@ void Application::createRenderPass()
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
 
+    VkSubpassDependency dependency {};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    ;
+    dependency.srcAccessMask = 0;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
     VkRenderPassCreateInfo createInfo {};
     createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     createInfo.attachmentCount = 1;
     createInfo.pAttachments = &colorAttachment;
     createInfo.subpassCount = 1;
     createInfo.pSubpasses = &subpass;
+    createInfo.dependencyCount = 1;
+    createInfo.pDependencies = &dependency;
 
     if (vkCreateRenderPass(mLogicalDevice, &createInfo, nullptr, &mRenderPass) != VK_SUCCESS)
     {
@@ -926,5 +995,36 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to record command buffer!");
+    }
+}
+
+void Application::createSyncronizationObject()
+{
+    VkSemaphoreCreateInfo semaphoreInfo {};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkFenceCreateInfo fenceInfo {};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    if (vkCreateSemaphore(mLogicalDevice, &semaphoreInfo, nullptr, &mImageAvailableSemaphore) != VK_SUCCESS)
+    {
+        std::cerr << "Failed to create Image Available Semaphore!" << std::endl;
+        mbQuit = true;
+        return;
+    }
+
+    if (vkCreateSemaphore(mLogicalDevice, &semaphoreInfo, nullptr, &mRenderFinishedSemaphore) != VK_SUCCESS)
+    {
+        std::cerr << "Failed to create Render Finished Semaphore!" << std::endl;
+        mbQuit = true;
+        return;
+    }
+
+    if (vkCreateFence(mLogicalDevice, &fenceInfo, nullptr, &mInFlightFence) != VK_SUCCESS)
+    {
+        std::cerr << "Failed to create In Flight Fence!" << std::endl;
+        mbQuit = true;
+        return;
     }
 }

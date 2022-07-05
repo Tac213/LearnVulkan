@@ -40,9 +40,13 @@ namespace LearnVulkan
         std::vector<VkFramebuffer> mSwapchainFramebuffers;
         VkCommandPool mCommandPool;
         VkCommandBuffer mCommandBuffer;
+        VkSemaphore mImageAvailableSemaphore;
+        VkSemaphore mRenderFinishedSemaphore;
+        VkFence mInFlightFence;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
+        void drawFrame();
 
     private:
         void createVulkanInstance();
@@ -87,5 +91,6 @@ namespace LearnVulkan
         void createCommandPool();
         void createCommandBuffer();
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void createSyncronizationObject();
     };
 }  // namespace LearnVulkan
