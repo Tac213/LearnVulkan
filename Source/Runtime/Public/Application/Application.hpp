@@ -39,10 +39,11 @@ namespace LearnVulkan
         VkPipeline mGraphicsPipeline;
         std::vector<VkFramebuffer> mSwapchainFramebuffers;
         VkCommandPool mCommandPool;
-        VkCommandBuffer mCommandBuffer;
-        VkSemaphore mImageAvailableSemaphore;
-        VkSemaphore mRenderFinishedSemaphore;
-        VkFence mInFlightFence;
+        std::vector<VkCommandBuffer> mCommandBuffers;
+        std::vector<VkSemaphore> mImageAvailableSemaphores;
+        std::vector<VkSemaphore> mRenderFinishedSemaphores;
+        std::vector<VkFence> mInFlightFences;
+        uint32_t mCurrentFrame = 0;
 
         virtual void initWindow() override;
         virtual void initVulkan() override;
@@ -87,10 +88,12 @@ namespace LearnVulkan
         void createGraphicsPipeline();
 
         VkShaderModule createShaderModule(std::vector<char> shaderCode);
+
+        static const int MAX_FRAMES_IN_FLIGHT;
         void createFramebuffers();
         void createCommandPool();
-        void createCommandBuffer();
+        void createCommandBuffers();
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-        void createSyncronizationObject();
+        void createSyncronizationObjects();
     };
 }  // namespace LearnVulkan
