@@ -43,6 +43,7 @@ namespace LearnVulkan
         std::vector<VkSemaphore> mImageAvailableSemaphores;
         std::vector<VkSemaphore> mRenderFinishedSemaphores;
         std::vector<VkFence> mInFlightFences;
+        bool mbFramebufferResized = false;
         uint32_t mCurrentFrame = 0;
 
         virtual void initWindow() override;
@@ -50,6 +51,7 @@ namespace LearnVulkan
         void drawFrame();
 
     private:
+        static void frameBufferResizeCallback(GLFWwindow* window, int width, int height);
         void createVulkanInstance();
         static bool checkExtensionSupport();
         static std::vector<const char*> getRequiredExtensions();
@@ -82,6 +84,7 @@ namespace LearnVulkan
         static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
         void createSwapchain();
+        void recreateSwapchain();
         void clearSwapchain();
         void createImageViews();
         void createRenderPass();

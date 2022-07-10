@@ -43,6 +43,7 @@ int Application::initialize()
 
 void Application::finalize()
 {
+    clearSwapchain();
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vkDestroyFence(mLogicalDevice, mInFlightFences[i], nullptr);
@@ -50,14 +51,6 @@ void Application::finalize()
         vkDestroySemaphore(mLogicalDevice, mImageAvailableSemaphores[i], nullptr);
     }
     vkDestroyCommandPool(mLogicalDevice, mCommandPool, nullptr);
-    for (VkFramebuffer framebuffer : mSwapchainFramebuffers)
-    {
-        vkDestroyFramebuffer(mLogicalDevice, framebuffer, nullptr);
-    }
-    vkDestroyPipeline(mLogicalDevice, mGraphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(mLogicalDevice, mPipelineLayout, nullptr);
-    vkDestroyRenderPass(mLogicalDevice, mRenderPass, nullptr);
-    clearSwapchain();
     vkDestroyDevice(mLogicalDevice, nullptr);
 #ifdef DEBUG
     destoryDebugUtilsMessengerEXT(mVulkanInstance, mDebugMessenger, nullptr);
@@ -97,11 +90,10 @@ void Application::initWindow()
     // we need to tell it to not create an OpenGL context with a subsequent call
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    // disable window resize
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
     // create window
     mWindow = glfwCreateWindow(mConfig.windowWidth, mConfig.windowHeight, mConfig.windowTitle, nullptr, nullptr);
+    glfwSetWindowUserPointer(mWindow, this);
+    glfwSetFramebufferSizeCallback(mWindow, frameBufferResizeCallback);
 }
 
 void Application::initVulkan()
@@ -132,12 +124,25 @@ void Application::drawFrame()
 {
     // Wait until the previous frame has finished
     vkWaitForFences(mLogicalDevice, 1, &mInFlightFences[mCurrentFrame], VK_TRUE, UINT64_MAX);
-    // reset the fence to the unsignaled state
-    vkResetFences(mLogicalDevice, 1, &mInFlightFences[mCurrentFrame]);
 
     // acquiring an image from the swap chain
     uint32_t imageIndex;
-    vkAcquireNextImageKHR(mLogicalDevice, mSwapchain, UINT64_MAX, mImageAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult acquireResult = vkAcquireNextImageKHR(mLogicalDevice, mSwapchain, UINT64_MAX, mImageAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &imageIndex);
+
+    if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        recreateSwapchain();
+        return;
+    }
+    else if (acquireResult != VK_SUCCESS && acquireResult != VK_SUBOPTIMAL_KHR)
+    {
+        std::cerr << "Failed to acquired swapchain image!" << std::endl;
+        return;
+    }
+
+    // reset the fence to the unsignaled state
+    // only reset the fence if we are submitting work
+    vkResetFences(mLogicalDevice, 1, &mInFlightFences[mCurrentFrame]);
 
     // record the command buffer
     vkResetCommandBuffer(mCommandBuffers[mCurrentFrame], 0);
@@ -177,9 +182,27 @@ void Application::drawFrame()
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    vkQueuePresentKHR(mPresentQueue, &presentInfo);
+    VkResult presentResult = vkQueuePresentKHR(mPresentQueue, &presentInfo);
+
+    if (presentResult == VK_ERROR_OUT_OF_DATE_KHR || presentResult == VK_SUBOPTIMAL_KHR || mbFramebufferResized)
+    {
+        mbFramebufferResized = false;
+        recreateSwapchain();
+    }
+    else if (presentResult != VK_SUCCESS)
+    {
+        std::cerr << "Failed to present swapchain images!" << std::endl;
+        mbQuit = true;
+        return;
+    }
 
     mCurrentFrame = (mCurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void Application::frameBufferResizeCallback(GLFWwindow* window, int width, int height)
+{
+    Application* application = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
+    application->mbFramebufferResized = true;
 }
 
 bool Application::checkExtensionSupport()
@@ -671,8 +694,35 @@ void Application::createSwapchain()
     mSwapchainExtent = extent;
 }
 
+void Application::recreateSwapchain()
+{
+    int width = 0, height = 0;
+    glfwGetFramebufferSize(mWindow, &width, &height);
+    while (width == 0 || height == 0)
+    {
+        glfwGetFramebufferSize(mWindow, &width, &height);
+        glfwWaitEvents();
+    }
+    vkDeviceWaitIdle(mLogicalDevice);
+
+    clearSwapchain();
+
+    createSwapchain();
+    createImageViews();
+    createRenderPass();
+    createGraphicsPipeline();
+    createFramebuffers();
+}
+
 void Application::clearSwapchain()
 {
+    for (VkFramebuffer framebuffer : mSwapchainFramebuffers)
+    {
+        vkDestroyFramebuffer(mLogicalDevice, framebuffer, nullptr);
+    }
+    vkDestroyPipeline(mLogicalDevice, mGraphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(mLogicalDevice, mPipelineLayout, nullptr);
+    vkDestroyRenderPass(mLogicalDevice, mRenderPass, nullptr);
     for (auto& imageView : mSwapchainImageViews)
     {
         vkDestroyImageView(mLogicalDevice, imageView, nullptr);
