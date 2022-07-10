@@ -57,7 +57,7 @@ void Application::finalize()
     vkDestroyPipeline(mLogicalDevice, mGraphicsPipeline, nullptr);
     vkDestroyPipelineLayout(mLogicalDevice, mPipelineLayout, nullptr);
     vkDestroyRenderPass(mLogicalDevice, mRenderPass, nullptr);
-    clearSwapChain();
+    clearSwapchain();
     vkDestroyDevice(mLogicalDevice, nullptr);
 #ifdef DEBUG
     destoryDebugUtilsMessengerEXT(mVulkanInstance, mDebugMessenger, nullptr);
@@ -118,7 +118,7 @@ void Application::initVulkan()
     createWindowSurface();
     pickPysicalDevice();
     createLogicalDevice();
-    createSwapChain();
+    createSwapchain();
     createImageViews();
     createRenderPass();
     createGraphicsPipeline();
@@ -137,7 +137,7 @@ void Application::drawFrame()
 
     // acquiring an image from the swap chain
     uint32_t imageIndex;
-    vkAcquireNextImageKHR(mLogicalDevice, mSwapChain, UINT64_MAX, mImageAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &imageIndex);
+    vkAcquireNextImageKHR(mLogicalDevice, mSwapchain, UINT64_MAX, mImageAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &imageIndex);
 
     // record the command buffer
     vkResetCommandBuffer(mCommandBuffers[mCurrentFrame], 0);
@@ -171,7 +171,7 @@ void Application::drawFrame()
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkSwapchainKHR swapchains[] = {mSwapChain};
+    VkSwapchainKHR swapchains[] = {mSwapchain};
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapchains;
     presentInfo.pImageIndices = &imageIndex;
@@ -399,13 +399,13 @@ int Application::rateDeviceSuitability(VkPhysicalDevice device)
 {
     QueueFamilyIndices indices = findQueueFamilyIndices(device);
     bool bExtensionsSupported = checkPhysicalDeviceSupport(device);
-    bool bSwapChainAdequate = false;
+    bool bSwapchainAdequate = false;
     if (bExtensionsSupported)
     {
-        SwapChainSupportDetails swapChainSupportDetails = querySwapChainSupport(device);
-        bSwapChainAdequate = !swapChainSupportDetails.formats.empty() && !swapChainSupportDetails.presentModes.empty();
+        SwapchainSupportDetails swapchainSupportDetails = querySwapchainSupport(device);
+        bSwapchainAdequate = !swapchainSupportDetails.formats.empty() && !swapchainSupportDetails.presentModes.empty();
     }
-    if (!indices.isComplete() || !bExtensionsSupported || !bSwapChainAdequate)
+    if (!indices.isComplete() || !bExtensionsSupported || !bSwapchainAdequate)
     {
         return 0;
     }
@@ -547,9 +547,9 @@ void Application::createWindowSurface()
     }
 }
 
-SwapChainSupportDetails Application::querySwapChainSupport(VkPhysicalDevice device)
+SwapchainSupportDetails Application::querySwapchainSupport(VkPhysicalDevice device)
 {
-    SwapChainSupportDetails details;
+    SwapchainSupportDetails details;
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, mWindowSurface, &details.capabilities);
 
@@ -612,9 +612,9 @@ VkExtent2D Application::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabil
     return actualExtent;
 }
 
-void Application::createSwapChain()
+void Application::createSwapchain()
 {
-    SwapChainSupportDetails swapChainSupportDetails = querySwapChainSupport(mPhysicalDevice);
+    SwapchainSupportDetails swapChainSupportDetails = querySwapchainSupport(mPhysicalDevice);
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupportDetails.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupportDetails.presentModes);
     VkExtent2D extent = chooseSwapExtent(swapChainSupportDetails.capabilities);
@@ -656,40 +656,40 @@ void Application::createSwapChain()
     createInfo.clipped = VK_TRUE;
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if (vkCreateSwapchainKHR(mLogicalDevice, &createInfo, nullptr, &mSwapChain) != VK_SUCCESS)
+    if (vkCreateSwapchainKHR(mLogicalDevice, &createInfo, nullptr, &mSwapchain) != VK_SUCCESS)
     {
         std::cerr << "Failed to create swap chain" << std::endl;
         mbQuit = true;
         return;
     }
 
-    vkGetSwapchainImagesKHR(mLogicalDevice, mSwapChain, &imageCount, nullptr);
-    mSwapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(mLogicalDevice, mSwapChain, &imageCount, mSwapChainImages.data());
+    vkGetSwapchainImagesKHR(mLogicalDevice, mSwapchain, &imageCount, nullptr);
+    mSwapchainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(mLogicalDevice, mSwapchain, &imageCount, mSwapchainImages.data());
 
-    mSwapChainImageFormat = surfaceFormat.format;
-    mSwapChainExtent = extent;
+    mSwapchainImageFormat = surfaceFormat.format;
+    mSwapchainExtent = extent;
 }
 
-void Application::clearSwapChain()
+void Application::clearSwapchain()
 {
-    for (auto& imageView : mSwapChainImageViews)
+    for (auto& imageView : mSwapchainImageViews)
     {
         vkDestroyImageView(mLogicalDevice, imageView, nullptr);
     }
-    vkDestroySwapchainKHR(mLogicalDevice, mSwapChain, nullptr);
+    vkDestroySwapchainKHR(mLogicalDevice, mSwapchain, nullptr);
 }
 
 void Application::createImageViews()
 {
-    mSwapChainImageViews.resize(mSwapChainImages.size());
-    for (size_t i = 0; i < mSwapChainImages.size(); i++)
+    mSwapchainImageViews.resize(mSwapchainImages.size());
+    for (size_t i = 0; i < mSwapchainImages.size(); i++)
     {
         VkImageViewCreateInfo createInfo {};
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        createInfo.image = mSwapChainImages[i];
+        createInfo.image = mSwapchainImages[i];
         createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.format = mSwapChainImageFormat;
+        createInfo.format = mSwapchainImageFormat;
 
         createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -702,7 +702,7 @@ void Application::createImageViews()
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(mLogicalDevice, &createInfo, nullptr, &mSwapChainImageViews[i]) != VK_SUCCESS)
+        if (vkCreateImageView(mLogicalDevice, &createInfo, nullptr, &mSwapchainImageViews[i]) != VK_SUCCESS)
         {
             std::cerr << "Failed to create image views!" << std::endl;
             mbQuit = true;
@@ -714,7 +714,7 @@ void Application::createImageViews()
 void Application::createRenderPass()
 {
     VkAttachmentDescription colorAttachment {};
-    colorAttachment.format = mSwapChainImageFormat;
+    colorAttachment.format = mSwapchainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -794,14 +794,14 @@ void Application::createGraphicsPipeline()
     VkViewport viewport {};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(mSwapChainExtent.width);
-    viewport.height = static_cast<float>(mSwapChainExtent.height);
+    viewport.width = static_cast<float>(mSwapchainExtent.width);
+    viewport.height = static_cast<float>(mSwapchainExtent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor {};
     scissor.offset = {0, 0};
-    scissor.extent = mSwapChainExtent;
+    scissor.extent = mSwapchainExtent;
 
     VkPipelineViewportStateCreateInfo viewportState {};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -918,19 +918,19 @@ VkShaderModule Application::createShaderModule(std::vector<char> shaderCode)
 
 void Application::createFramebuffers()
 {
-    mSwapchainFramebuffers.resize(mSwapChainImageViews.size());
+    mSwapchainFramebuffers.resize(mSwapchainImageViews.size());
 
-    for (size_t i = 0; i < mSwapChainImageViews.size(); i++)
+    for (size_t i = 0; i < mSwapchainImageViews.size(); i++)
     {
-        VkImageView attachments[] = {mSwapChainImageViews[i]};
+        VkImageView attachments[] = {mSwapchainImageViews[i]};
 
         VkFramebufferCreateInfo framebufferInfo {};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = mRenderPass;
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = mSwapChainExtent.width;
-        framebufferInfo.height = mSwapChainExtent.height;
+        framebufferInfo.width = mSwapchainExtent.width;
+        framebufferInfo.height = mSwapchainExtent.height;
         framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(mLogicalDevice, &framebufferInfo, nullptr, &mSwapchainFramebuffers[i]) != VK_SUCCESS)
@@ -989,7 +989,7 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
     renderPassInfo.renderPass = mRenderPass;
     renderPassInfo.framebuffer = mSwapchainFramebuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = mSwapChainExtent;
+    renderPassInfo.renderArea.extent = mSwapchainExtent;
 
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
     renderPassInfo.clearValueCount = 1;

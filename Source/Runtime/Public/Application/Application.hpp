@@ -4,7 +4,7 @@
 #include "Interface/IApplication.hpp"
 #include "Interface/Interface.hpp"
 #include "VulkanUtility/QueueFamilyIndices.hpp"
-#include "VulkanUtility/SwapChainSupportDetails.hpp"
+#include "VulkanUtility/SwapchainSupportDetails.hpp"
 #include <vector>
 
 namespace LearnVulkan
@@ -29,11 +29,11 @@ namespace LearnVulkan
         VkDevice mLogicalDevice;
         VkQueue mGraphicsQueue;
         VkQueue mPresentQueue;
-        VkSwapchainKHR mSwapChain;
-        std::vector<VkImage> mSwapChainImages;
-        VkFormat mSwapChainImageFormat;
-        VkExtent2D mSwapChainExtent;
-        std::vector<VkImageView> mSwapChainImageViews;
+        VkSwapchainKHR mSwapchain;
+        std::vector<VkImage> mSwapchainImages;
+        VkFormat mSwapchainImageFormat;
+        VkExtent2D mSwapchainExtent;
+        std::vector<VkImageView> mSwapchainImageViews;
         VkRenderPass mRenderPass;
         VkPipelineLayout mPipelineLayout;
         VkPipeline mGraphicsPipeline;
@@ -77,12 +77,12 @@ namespace LearnVulkan
         void createLogicalDevice();
         void createWindowSurface();
 
-        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+        SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device);
         static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
         static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-        void createSwapChain();
-        void clearSwapChain();
+        void createSwapchain();
+        void clearSwapchain();
         void createImageViews();
         void createRenderPass();
         void createGraphicsPipeline();
