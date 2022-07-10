@@ -3,6 +3,7 @@
 #include "Configuration.hpp"
 #include "Interface/IApplication.hpp"
 #include "Interface/Interface.hpp"
+#include "Vertex.hpp"
 #include "VulkanUtility/QueueFamilyIndices.hpp"
 #include "VulkanUtility/SwapchainSupportDetails.hpp"
 #include <vector>
@@ -39,6 +40,8 @@ namespace LearnVulkan
         VkPipeline mGraphicsPipeline;
         std::vector<VkFramebuffer> mSwapchainFramebuffers;
         VkCommandPool mCommandPool;
+        VkBuffer mVertexBuffer;
+        VkDeviceMemory mVertexBufferMemory;
         std::vector<VkCommandBuffer> mCommandBuffers;
         std::vector<VkSemaphore> mImageAvailableSemaphores;
         std::vector<VkSemaphore> mRenderFinishedSemaphores;
@@ -51,6 +54,10 @@ namespace LearnVulkan
         void drawFrame();
 
     private:
+        const std::vector<Vertex> vertices = {
+            {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
         static void frameBufferResizeCallback(GLFWwindow* window, int width, int height);
         void createVulkanInstance();
         static bool checkExtensionSupport();
@@ -95,8 +102,11 @@ namespace LearnVulkan
         static const int MAX_FRAMES_IN_FLIGHT;
         void createFramebuffers();
         void createCommandPool();
+        void createVertexBuffer();
         void createCommandBuffers();
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
         void createSyncronizationObjects();
+
+        uint32_t findPhysicalDeviceMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     };
 }  // namespace LearnVulkan
