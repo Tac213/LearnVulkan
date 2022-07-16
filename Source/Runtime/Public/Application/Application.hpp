@@ -42,6 +42,8 @@ namespace LearnVulkan
         VkCommandPool mCommandPool;
         VkBuffer mVertexBuffer;
         VkDeviceMemory mVertexBufferMemory;
+        VkBuffer mIndexBuffer;
+        VkDeviceMemory mIndexBufferMemory;
         std::vector<VkCommandBuffer> mCommandBuffers;
         std::vector<VkSemaphore> mImageAvailableSemaphores;
         std::vector<VkSemaphore> mRenderFinishedSemaphores;
@@ -55,9 +57,11 @@ namespace LearnVulkan
 
     private:
         const std::vector<Vertex> vertices = {
-            {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+        const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0};
         static void frameBufferResizeCallback(GLFWwindow* window, int width, int height);
         void createVulkanInstance();
         static bool checkExtensionSupport();
@@ -103,6 +107,7 @@ namespace LearnVulkan
         void createFramebuffers();
         void createCommandPool();
         void createVertexBuffer();
+        void createIndexBuffer();
         void createCommandBuffers();
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
         void createSyncronizationObjects();
