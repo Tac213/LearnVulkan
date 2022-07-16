@@ -6,6 +6,7 @@
 #include "Vertex.hpp"
 #include "VulkanUtility/QueueFamilyIndices.hpp"
 #include "VulkanUtility/SwapchainSupportDetails.hpp"
+#include "VulkanUtility/UniformBufferObject.hpp"
 #include <vector>
 
 namespace LearnVulkan
@@ -36,6 +37,7 @@ namespace LearnVulkan
         VkExtent2D mSwapchainExtent;
         std::vector<VkImageView> mSwapchainImageViews;
         VkRenderPass mRenderPass;
+        VkDescriptorSetLayout mDescriptorSetLayout;
         VkPipelineLayout mPipelineLayout;
         VkPipeline mGraphicsPipeline;
         std::vector<VkFramebuffer> mSwapchainFramebuffers;
@@ -44,6 +46,10 @@ namespace LearnVulkan
         VkDeviceMemory mVertexBufferMemory;
         VkBuffer mIndexBuffer;
         VkDeviceMemory mIndexBufferMemory;
+        std::vector<VkBuffer> mUniformBuffers;
+        std::vector<VkDeviceMemory> mUniformBuffersMemory;
+        VkDescriptorPool mDescriptorPool;
+        std::vector<VkDescriptorSet> mDescriptorSets;
         std::vector<VkCommandBuffer> mCommandBuffers;
         std::vector<VkSemaphore> mImageAvailableSemaphores;
         std::vector<VkSemaphore> mRenderFinishedSemaphores;
@@ -99,6 +105,7 @@ namespace LearnVulkan
         void clearSwapchain();
         void createImageViews();
         void createRenderPass();
+        void createDescriptorSetLayout();
         void createGraphicsPipeline();
 
         VkShaderModule createShaderModule(std::vector<char> shaderCode);
@@ -108,6 +115,9 @@ namespace LearnVulkan
         void createCommandPool();
         void createVertexBuffer();
         void createIndexBuffer();
+        void createUniformBuffers();
+        void createDescriptorPool();
+        void createDescriptorSets();
         void createCommandBuffers();
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
         void createSyncronizationObjects();
@@ -116,5 +126,7 @@ namespace LearnVulkan
 
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+        void updateUniformBuffer(uint32_t currentImageIndex);
     };
 }  // namespace LearnVulkan

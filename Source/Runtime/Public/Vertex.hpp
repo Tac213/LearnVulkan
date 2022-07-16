@@ -1,7 +1,7 @@
 #include <array>
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.h>
-
 
 namespace LearnVulkan
 {
