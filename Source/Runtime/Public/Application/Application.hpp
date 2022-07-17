@@ -42,6 +42,8 @@ namespace LearnVulkan
         VkPipeline mGraphicsPipeline;
         std::vector<VkFramebuffer> mSwapchainFramebuffers;
         VkCommandPool mCommandPool;
+        VkImage mTextureImage;
+        VkDeviceMemory mTextureImageMemory;
         VkBuffer mVertexBuffer;
         VkDeviceMemory mVertexBufferMemory;
         VkBuffer mIndexBuffer;
@@ -126,7 +128,16 @@ namespace LearnVulkan
 
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+        void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+        void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+        VkCommandBuffer beginSingleTimeCommands();
+        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
         void updateUniformBuffer(uint32_t currentImageIndex);
+
+        void createTextureImage();
+
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     };
 }  // namespace LearnVulkan

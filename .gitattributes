@@ -25,3 +25,7 @@ config.hpp.in text
 # Declare files that will always have LF line endings on checkout
 *.sh text eol=lf
 *.command text eol=lf
+#Image files
+*.png filter=lfs diff=lfs merge=lfs eol=lf -text
+*.jpg filter=lfs diff=lfs merge=lfs eol=lf -text
+*.gif filter=lfs diff=lfs merge=lfs eol=lf -text

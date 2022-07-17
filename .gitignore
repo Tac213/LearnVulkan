@@ -46,3 +46,5 @@ config.hpp
 
 # auto generated files
 Engine/External/Source/glad/
+
+.DS_Store
