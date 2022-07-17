@@ -6,3 +6,7 @@
 	path = ThirdParty/glm
 	url = git@github.com:g-truc/glm.git
 	branch = cmake3
+[submodule "ThirdParty/stb"]
+	path = ThirdParty/stb
+	url = git@github.com:nothings/stb.git
+	branch = master

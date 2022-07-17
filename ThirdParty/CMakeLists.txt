@@ -19,3 +19,8 @@ if(NOT TARGET glfw)
     set_target_properties(glfw PROPERTIES FOLDER ${THIRD_PARTY_FOLDER}/glfw)
     set_target_properties(update_mappings PROPERTIES FOLDER ${THIRD_PARTY_FOLDER}/glfw)
 endif()
+
+if(NOT TARGET stb)
+    include(stb.cmake)
+    set_target_properties(stb PROPERTIES FOLDER ${THIRD_PARTY_FOLDER}/stb)
+endif()
