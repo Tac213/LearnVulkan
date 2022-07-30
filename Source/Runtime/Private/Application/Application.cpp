@@ -986,10 +986,19 @@ void Application::createDescriptorSetLayout()
     uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBinding.pImmutableSamplers = nullptr;
 
+    VkDescriptorSetLayoutBinding samplerLayoutBinding {};
+    samplerLayoutBinding.binding = 1;
+    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    samplerLayoutBinding.descriptorCount = 1;
+    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    samplerLayoutBinding.pImmutableSamplers = nullptr;
+
+    std::array<VkDescriptorSetLayoutBinding, 2> bindings {uboLayoutBinding, samplerLayoutBinding};
+
     VkDescriptorSetLayoutCreateInfo uboLayoutInfo {};
     uboLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    uboLayoutInfo.bindingCount = 1;
-    uboLayoutInfo.pBindings = &uboLayoutBinding;
+    uboLayoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    uboLayoutInfo.pBindings = bindings.data();
 
     if (vkCreateDescriptorSetLayout(mLogicalDevice, &uboLayoutInfo, nullptr, &mDescriptorSetLayout) != VK_SUCCESS)
     {
@@ -1109,14 +1118,16 @@ void Application::createUniformBuffers()
 
 void Application::createDescriptorPool()
 {
-    VkDescriptorPoolSize poolSize {};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    std::array<VkDescriptorPoolSize, 2> poolSizes {};
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
     VkDescriptorPoolCreateInfo poolInfo {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
     if (vkCreateDescriptorPool(mLogicalDevice, &poolInfo, nullptr, &mDescriptorPool) != VK_SUCCESS)
@@ -1151,18 +1162,33 @@ void Application::createDescriptorSets()
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(UniformBufferObject);
 
-        VkWriteDescriptorSet writeDescriptorSet {};
-        writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeDescriptorSet.dstSet = mDescriptorSets[i];
-        writeDescriptorSet.dstBinding = 0;
-        writeDescriptorSet.dstArrayElement = 0;
-        writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        writeDescriptorSet.descriptorCount = 1;
-        writeDescriptorSet.pBufferInfo = &bufferInfo;
-        writeDescriptorSet.pImageInfo = nullptr;
-        writeDescriptorSet.pTexelBufferView = nullptr;
+        VkDescriptorImageInfo imageInfo {};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = mTextureImageView;
+        imageInfo.sampler = mTextureSampler;
 
-        vkUpdateDescriptorSets(mLogicalDevice, 1, &writeDescriptorSet, 0, nullptr);
+        std::array<VkWriteDescriptorSet, 2> writeDescriptorSets {};
+        writeDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writeDescriptorSets[0].dstSet = mDescriptorSets[i];
+        writeDescriptorSets[0].dstBinding = 0;
+        writeDescriptorSets[0].dstArrayElement = 0;
+        writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        writeDescriptorSets[0].descriptorCount = 1;
+        writeDescriptorSets[0].pBufferInfo = &bufferInfo;
+        writeDescriptorSets[0].pImageInfo = nullptr;
+        writeDescriptorSets[0].pTexelBufferView = nullptr;
+
+        writeDescriptorSets[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writeDescriptorSets[1].dstSet = mDescriptorSets[i];
+        writeDescriptorSets[1].dstBinding = 1;
+        writeDescriptorSets[1].dstArrayElement = 0;
+        writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        writeDescriptorSets[1].descriptorCount = 1;
+        writeDescriptorSets[1].pBufferInfo = nullptr;
+        writeDescriptorSets[1].pImageInfo = &imageInfo;
+        writeDescriptorSets[1].pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(mLogicalDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
     }
 }
 
