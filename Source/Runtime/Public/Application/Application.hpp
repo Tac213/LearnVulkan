@@ -43,6 +43,9 @@ namespace LearnVulkan
         VkPipeline mGraphicsPipeline;
         std::vector<VkFramebuffer> mSwapchainFramebuffers;
         VkCommandPool mCommandPool;
+        VkImage mDepthImage;
+        VkDeviceMemory mDepthImageMemory;
+        VkImageView mDepthImageView;
         VkImage mTextureImage;
         VkImageView mTextureImageView;
         VkSampler mTextureSampler;
@@ -68,11 +71,16 @@ namespace LearnVulkan
 
     private:
         const std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
-        const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0};
+            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+
+            {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+            {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+            {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
+        const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
         static void frameBufferResizeCallback(GLFWwindow* window, int width, int height);
         void createVulkanInstance();
         static bool checkExtensionSupport();
@@ -118,6 +126,7 @@ namespace LearnVulkan
         static const int MAX_FRAMES_IN_FLIGHT;
         void createFramebuffers();
         void createCommandPool();
+        void createDepthResources();
         void createVertexBuffer();
         void createIndexBuffer();
         void createUniformBuffers();
@@ -132,7 +141,7 @@ namespace LearnVulkan
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-        VkImageView createImageView(VkImage image, VkFormat format);
+        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
         void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
         VkCommandBuffer beginSingleTimeCommands();
@@ -145,5 +154,9 @@ namespace LearnVulkan
         void createTextureSampler();
 
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
+        VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        VkFormat findDepthFormat();
+        static bool hasStencilComponent(VkFormat format);
     };
 }  // namespace LearnVulkan
