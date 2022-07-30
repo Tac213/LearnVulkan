@@ -28,6 +28,7 @@ namespace LearnVulkan
         VkInstance mVulkanInstance;
         VkSurfaceKHR mWindowSurface;
         VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
+        VkPhysicalDeviceProperties mPhysicalDeviceProperties;
         VkDevice mLogicalDevice;
         VkQueue mGraphicsQueue;
         VkQueue mPresentQueue;
@@ -43,6 +44,8 @@ namespace LearnVulkan
         std::vector<VkFramebuffer> mSwapchainFramebuffers;
         VkCommandPool mCommandPool;
         VkImage mTextureImage;
+        VkImageView mTextureImageView;
+        VkSampler mTextureSampler;
         VkDeviceMemory mTextureImageMemory;
         VkBuffer mVertexBuffer;
         VkDeviceMemory mVertexBufferMemory;
@@ -129,6 +132,7 @@ namespace LearnVulkan
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+        VkImageView createImageView(VkImage image, VkFormat format);
         void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
         VkCommandBuffer beginSingleTimeCommands();
@@ -137,6 +141,8 @@ namespace LearnVulkan
         void updateUniformBuffer(uint32_t currentImageIndex);
 
         void createTextureImage();
+        void createTextureImageView();
+        void createTextureSampler();
 
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     };
