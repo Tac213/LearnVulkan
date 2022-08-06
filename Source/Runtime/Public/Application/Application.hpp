@@ -50,9 +50,13 @@ namespace LearnVulkan
         VkImageView mDepthImageView;
         uint32_t mMipLevels;
         VkImage mTextureImage;
+        VkDeviceMemory mTextureImageMemory;
         VkImageView mTextureImageView;
         VkSampler mTextureSampler;
-        VkDeviceMemory mTextureImageMemory;
+        VkSampleCountFlagBits mMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
+        VkImage mColorImage;
+        VkDeviceMemory mColorImageMemory;
+        VkImageView mColorImageView;
         VkBuffer mVertexBuffer;
         VkDeviceMemory mVertexBufferMemory;
         VkBuffer mIndexBuffer;
@@ -96,7 +100,7 @@ namespace LearnVulkan
         static const std::vector<const char*> VALIDATION_LAYERS;
 #endif
 
-        void pickPysicalDevice();
+        void pickPhysicalDevice();
         int rateDeviceSuitability(VkPhysicalDevice device);
         QueueFamilyIndices findQueueFamilyIndices(VkPhysicalDevice device);
         static bool checkPhysicalDeviceSupport(VkPhysicalDevice device);
@@ -122,6 +126,7 @@ namespace LearnVulkan
         static const int MAX_FRAMES_IN_FLIGHT;
         void createFramebuffers();
         void createCommandPool();
+        void createColorResources();
         void createDepthResources();
         void createVertexBuffer();
         void createIndexBuffer();
@@ -136,7 +141,7 @@ namespace LearnVulkan
 
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-        void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+        void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
         void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
         void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t width, int32_t height, uint32_t mipLevels);
@@ -149,6 +154,7 @@ namespace LearnVulkan
         void createTextureImage();
         void createTextureImageView();
         void createTextureSampler();
+        VkSampleCountFlagBits getMaxUsableSampleCount() const;
 
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 
