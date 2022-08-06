@@ -10,3 +10,7 @@
 	path = ThirdParty/stb
 	url = git@github.com:nothings/stb.git
 	branch = master
+[submodule "ThirdParty/tinyobjloader"]
+	path = ThirdParty/tinyobjloader
+	url = git@github.com:tinyobjloader/tinyobjloader.git
+	branch = master

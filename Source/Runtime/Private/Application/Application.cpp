@@ -13,6 +13,8 @@
 #include <set>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
 #include <vector>
 
 using namespace LearnVulkan;
@@ -137,6 +139,7 @@ void Application::initVulkan()
     createTextureImage();
     createTextureImageView();
     createTextureSampler();
+    loadModel();
     createVertexBuffer();
     createIndexBuffer();
     createUniformBuffers();
@@ -1289,7 +1292,7 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
     VkBuffer vertexBuffers[] = {mVertexBuffer};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffer, mIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindIndexBuffer(commandBuffer, mIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[mCurrentFrame], 0, nullptr);
     // vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
@@ -1539,7 +1542,7 @@ void Application::updateUniformBuffer(uint32_t currentImageIndex)
 void Application::createTextureImage()
 {
     int textureWidth, textureHeight, textureChannels;
-    stbi_uc* pixels = stbi_load("Texture/Test.jpg", &textureWidth, &textureHeight, &textureChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(texturePath.c_str(), &textureWidth, &textureHeight, &textureChannels, STBI_rgb_alpha);
     if (!pixels)
     {
         throw std::runtime_error("Failed to load Texture Image!");
@@ -1700,4 +1703,42 @@ VkFormat Application::findDepthFormat()
 bool Application::hasStencilComponent(VkFormat format)
 {
     return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+}
+
+void Application::loadModel()
+{
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warning, error;
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warning, &error, modelPath.c_str()))
+    {
+        throw std::runtime_error(warning + error);
+    }
+
+    std::unordered_map<Vertex, uint32_t> uniqueVertices {};
+
+    for (const tinyobj::shape_t& shape : shapes)
+    {
+        for (const tinyobj::index_t& index : shape.mesh.indices)
+        {
+            Vertex vertex {};
+            vertex.pos = {
+                attrib.vertices[3 * index.vertex_index + 0],
+                attrib.vertices[3 * index.vertex_index + 1],
+                attrib.vertices[3 * index.vertex_index + 2],
+            };
+            vertex.texCoord = {
+                attrib.vertices[2 * index.texcoord_index + 0],
+                1.0f - attrib.vertices[2 * index.texcoord_index + 1],
+            };
+            vertex.color = {1.0f, 1.0f, 1.0f};
+            if (uniqueVertices.count(vertex) == 0)
+            {
+                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                vertices.push_back(vertex);
+            }
+            indices.push_back(uniqueVertices[vertex]);
+        }
+    }
 }

@@ -48,3 +48,6 @@ config.hpp
 Engine/External/Source/glad/
 
 .DS_Store
+
+# Model files
+!Model/*.obj

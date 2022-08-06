@@ -7,6 +7,8 @@
 #include "VulkanUtility/QueueFamilyIndices.hpp"
 #include "VulkanUtility/SwapchainSupportDetails.hpp"
 #include "VulkanUtility/UniformBufferObject.hpp"
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace LearnVulkan
@@ -70,17 +72,10 @@ namespace LearnVulkan
         void drawFrame();
 
     private:
-        const std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-
-            {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
-        const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
+        const std::string modelPath = "Model/viking_room.obj";
+        const std::string texturePath = "Texture/viking_room.png";
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
         static void frameBufferResizeCallback(GLFWwindow* window, int width, int height);
         void createVulkanInstance();
         static bool checkExtensionSupport();
@@ -158,5 +153,7 @@ namespace LearnVulkan
         VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
         VkFormat findDepthFormat();
         static bool hasStencilComponent(VkFormat format);
+
+        void loadModel();
     };
 }  // namespace LearnVulkan

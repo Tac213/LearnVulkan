@@ -2,6 +2,11 @@
 
 using namespace LearnVulkan;
 
+bool Vertex::operator==(const Vertex& another) const
+{
+    return pos == another.pos && texCoord == another.texCoord && color == another.color;
+}
+
 VkVertexInputBindingDescription Vertex::getBindingDescription()
 {
     VkVertexInputBindingDescription bindingDescription {};
